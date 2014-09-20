@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="griffio.persistence.mybatty.EmployeeMapper">
+
+    <resultMap id="employeeResult" type="Employee">
+        <result column="employee_id" property="id"/>
+        <result column="firstname" property="firstname"/>
+        <result column="lastname" property="lastname"/>
+        <result column="dob" property="dob" />
+        <association property="employer" resultMap="griffio.persistence.mybatty.EmployeeMapper.employerResult"/>
+    </resultMap>
+    <resultMap id="employerResult" type="Employer">
+        <result column="employer_id" property="id"/>
+    </resultMap>
+
+    <select id="selectEmployee" parameterType="long" resultMap="griffio.persistence.mybatty.EmployeeMapper.employeeResult">
+        SELECT ee.employee_id, ee.firstname, ee.lastname, ee.dob, er.employer_id
+        FROM Employee ee, Employer er
+        WHERE ee.employee_id = #{value}
+        AND   ee.employer_id = er.employer_id
+    </select>
+
+    <update id="updateEmployee" parameterType="Employee">
+        UPDATE Employee
+        SET dob = #{dob}, firstname = #{firstname}, lastname = #{lastname}
+        WHERE employee_id = #{id}
+    </update>
+
+    <insert id="insertEmployee" parameterType="Employee">
+        INSERT INTO Employee (employee_id, firstname, lastname, dob, employer_id)
+        VALUES(#{id}, #{firstname}, #{lastname}, #{dob}, #{employer.id})
+    </insert>
+
+</mapper>

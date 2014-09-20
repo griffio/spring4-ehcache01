@@ -1,0 +1,66 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:cache="http://www.springframework.org/schema/cache"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+     http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+
+    <context:component-scan base-package="griffio.service"/>
+
+    <context:annotation-config/>
+
+    <cache:annotation-driven/>
+
+    <tx:annotation-driven/>
+
+    <jdbc:embedded-database id="dataSource">
+        <jdbc:script location="classpath*:/griffio/persistence/db.ddl"/>
+    </jdbc:embedded-database>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="mapperLocations" value="classpath*:/griffio/persistence/mybatty/**/*.xml"/>
+        <property name="typeAliasesPackage" value="griffio.domain"/>
+        <property name="configLocation" value="/mybatis-config.xml"/>
+    </bean>
+
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg index="0" ref="sqlSessionFactory"/>
+    </bean>
+
+    <bean id="employeeDao" class="griffio.persistence.mybatty.EmployeeMapper">
+        <constructor-arg ref="sqlSession"/>
+    </bean>
+
+    <bean id="listDao" class="griffio.persistence.mybatty.ListMapper">
+        <constructor-arg ref="sqlSession"/>
+    </bean>
+
+    <bean id="employeeService" class="griffio.service.EmployeeDaoService">
+        <constructor-arg ref="employeeDao"/>
+    </bean>
+
+    <bean id="listService" class="griffio.service.ListDaoService">
+        <constructor-arg ref="listDao"/>
+    </bean>
+
+    <bean id="employeesCacheKeyGenerator" class="griffio.cache.interceptor.employeesCacheKeyGenerator"/>
+
+    <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+        <property name="cacheManager" ref="ehcache"/>
+    </bean>
+
+    <bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+        <property name="configLocation" value="ehcache.xml"/>
+    </bean>
+
+</beans>

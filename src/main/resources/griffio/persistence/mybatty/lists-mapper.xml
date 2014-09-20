@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="griffio.persistence.mybatty.ListMapper">
+
+    <select id="listEmployees" parameterType="long" resultType="String">
+        SELECT employee_id || ' ' || firstname || ' ' || lastname || ' ' || TO_CHAR(dob, 'DD-MMM-YYYY')
+        FROM Employee
+        WHERE employer_id = #{value}
+    </select>
+
+</mapper>
